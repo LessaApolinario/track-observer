@@ -1,12 +1,12 @@
 import { TrackProvider } from "@/ui/contexts/TrackProvider"
 import type { Metadata } from "next"
-import { Quicksand } from "next/font/google"
+import { Manrope } from "next/font/google"
 import "./globals.css"
 
-const quicksand = Quicksand({
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-quicksand",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-manrope",
+  weight: ["400", "500", "600", "700", "800"],
 })
 
 export const metadata: Metadata = {
@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className={`${quicksand.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html lang="pt-BR" className={`${manrope.variable} h-full antialiased`}>
+      <body className="min-h-full font-sans text-foreground">
         <TrackProvider>{children}</TrackProvider>
       </body>
     </html>
