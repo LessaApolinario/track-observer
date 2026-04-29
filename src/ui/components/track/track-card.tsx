@@ -8,7 +8,7 @@ interface TrackCardProps {
 export function TrackCard({ track, isCurrent }: TrackCardProps) {
   return (
     <div>
-      <h3>{track.name}</h3>
+      <h3>{track.title}</h3>
       <p>{track.artist}</p>
       <p>{track.album}</p>
       <p>{track.duration} seconds</p>
