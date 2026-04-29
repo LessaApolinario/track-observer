@@ -6,22 +6,7 @@ import { TrackContext } from '.'
 
 export function TrackProvider({ children }: PropsWithChildren) {
   const [currentTrack, setCurrentTrack] = useState<Track>()
-  const [tracks, setTracks] = useState<Track[]>([
-    {
-      id: '1',
-      title: 'Golden Hour Frequency',
-      artist: 'Luna Arcade',
-      album: 'Signals at Dusk',
-      duration: 240,
-    },
-    {
-      id: '2',
-      title: 'Midnight Drive',
-      artist: 'Neon Skyline',
-      album: 'City Lights',
-      duration: 210,
-    },
-  ])
+  const [tracks, setTracks] = useState<Track[]>([])
 
   const addTrack = useCallback((newTrack: Track) => {
     setTracks((prevTracks) => [...prevTracks, newTrack])
