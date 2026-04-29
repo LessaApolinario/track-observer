@@ -1,11 +1,9 @@
-import { Track } from '@/core/domain/models/Track'
+import { useCurrentTrack } from '@/ui/contexts/hooks'
 
-interface CurrentTrackCardProps {
-  track: Track | undefined
-}
+export function CurrentTrackCard() {
+  const currentTrack = useCurrentTrack()
 
-export function CurrentTrackCard({ track }: CurrentTrackCardProps) {
-  if (!track) {
+  if (!currentTrack) {
     return (
       <div className="rounded-panel border-border bg-surface border px-6 py-8 text-center">
         <p className="text-muted text-sm">Nenhuma faixa tocando no momento.</p>
@@ -13,8 +11,8 @@ export function CurrentTrackCard({ track }: CurrentTrackCardProps) {
     )
   }
 
-  const minutes = Math.floor(track.duration / 60)
-  const seconds = String(track.duration % 60).padStart(2, '0')
+  const minutes = Math.floor(currentTrack.duration / 60)
+  const seconds = String(currentTrack.duration % 60).padStart(2, '0')
 
   return (
     <article className="rounded-panel border-primary/25 bg-surface relative overflow-hidden border">
@@ -29,16 +27,18 @@ export function CurrentTrackCard({ track }: CurrentTrackCardProps) {
         </div>
 
         <div className="space-y-1">
-          <h2 className="text-foreground text-3xl font-bold">{track.title}</h2>
-          <p className="text-muted text-base">{track.artist}</p>
+          <h2 className="text-foreground text-3xl font-bold">
+            {currentTrack.title}
+          </h2>
+          <p className="text-muted text-base">{currentTrack.artist}</p>
         </div>
 
         <div className="text-muted flex items-center gap-3 text-sm">
-          <span>{track.album}</span>
+          <span>{currentTrack.album}</span>
           <span aria-hidden>·</span>
           <span>
             {minutes}:{seconds}
-            <span className="sr-only"> ({track.duration} segundos)</span>
+            <span className="sr-only"> ({currentTrack.duration} segundos)</span>
           </span>
         </div>
       </div>
