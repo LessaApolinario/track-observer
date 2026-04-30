@@ -5,7 +5,7 @@ const mockUseCurrentTrack = jest.fn()
 const mockUseSpotifyAuthUrl = jest.fn()
 const mockUseConnectSpotify = jest.fn()
 
-jest.mock('../../../src/ui/contexts/hooks.ts', () => ({
+jest.mock('../../../src/ui/contexts/track/hooks.ts', () => ({
   useCurrentTrack: () => mockUseCurrentTrack(),
   useSpotifyAuthUrl: () => mockUseSpotifyAuthUrl(),
   useConnectSpotify: () => mockUseConnectSpotify(),

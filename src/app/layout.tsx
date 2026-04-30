@@ -1,4 +1,4 @@
-import { TrackProvider } from '@/ui/contexts/TrackProvider'
+import { TrackProvider } from '@/ui/contexts/track/TrackProvider'
 import type { Metadata } from 'next'
 import { Manrope } from 'next/font/google'
 import './globals.css'

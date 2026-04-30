@@ -4,7 +4,7 @@ import {
   useConnectSpotify,
   useCurrentTrack,
   useSpotifyAuthUrl,
-} from '@/ui/contexts/hooks'
+} from '@/ui/contexts/track/hooks'
 
 export function CurrentTrackCard() {
   const currentTrack = useCurrentTrack()

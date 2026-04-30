@@ -1,7 +1,7 @@
 'use client'
 
 import { Track } from '@/core/domain/models/Track'
-import { useAddTrack, useSearchTrack } from '@/ui/contexts/hooks'
+import { useAddTrack, useSearchTrack } from '@/ui/contexts/track/hooks'
 import { SyntheticEvent, useState } from 'react'
 
 export function SearchTrack() {

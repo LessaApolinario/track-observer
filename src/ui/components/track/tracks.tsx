@@ -1,6 +1,6 @@
 'use client'
 
-import { useCurrentTrack, useTracks } from '@/ui/contexts/hooks'
+import { useCurrentTrack, useTracks } from '@/ui/contexts/track/hooks'
 import { TrackCard } from './track-card'
 
 export function Tracks() {

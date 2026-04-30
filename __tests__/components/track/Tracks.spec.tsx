@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 const mockUseTracks = jest.fn()
 const mockUseCurrentTrack = jest.fn()
 
-jest.mock('../../../src/ui/contexts/hooks.ts', () => ({
+jest.mock('../../../src/ui/contexts/track/hooks.ts', () => ({
   useTracks: () => mockUseTracks(),
   useCurrentTrack: () => mockUseCurrentTrack(),
 }))
