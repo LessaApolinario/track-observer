@@ -16,9 +16,25 @@ export function TrackCard({ track, isCurrent }: TrackCardProps) {
   const seconds = String(track.duration % 60).padStart(2, '0')
 
   return (
-    <article className="border-border bg-surface flex items-center justify-between gap-4 rounded-xl border px-4 py-3">
+    <article
+      className={`flex items-center justify-between gap-4 rounded-xl border px-4 py-3 transition-colors ${
+        isCurrent
+          ? 'border-primary/40 bg-primary/8'
+          : 'border-border bg-surface'
+      }`}
+    >
       <div className="min-w-0 space-y-0.5">
-        <p className="text-foreground truncate font-semibold">{track.title}</p>
+        <div className="flex items-center gap-2">
+          {isCurrent && (
+            <span
+              className="bg-primary h-2 w-2 shrink-0 animate-pulse rounded-full"
+              aria-label="Tocando agora"
+            />
+          )}
+          <p className="text-foreground truncate font-semibold">
+            {track.title}
+          </p>
+        </div>
         <p className="text-muted truncate text-sm">{track.artist}</p>
       </div>
 
@@ -29,13 +45,6 @@ export function TrackCard({ track, isCurrent }: TrackCardProps) {
           <span className="sr-only"> ({track.duration} segundos)</span>
         </p>
       </div>
-
-      {isCurrent && (
-        <span
-          className="bg-primary h-1.5 w-1.5 shrink-0 rounded-full"
-          aria-label="Tocando agora"
-        />
-      )}
     </article>
   )
 }
