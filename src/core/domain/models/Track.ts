@@ -4,4 +4,5 @@ export interface Track {
   artist: string
   album: string
   duration: number
+  imageUrl: string
 }

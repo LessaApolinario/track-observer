@@ -1,3 +1,5 @@
+'use client'
+
 import { Track } from '@/core/domain/models/Track'
 
 interface TrackCardProps {

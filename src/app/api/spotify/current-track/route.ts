@@ -1,6 +1,7 @@
+import { SpotifyCurrentlyPlayingResponse } from '@/core/@types/spotify'
+import { SpotifyToTrackMapper } from '@/core/mappers/spotifyToTrackMapper'
 import axios from 'axios'
 import { NextRequest, NextResponse } from 'next/server'
-import { Track } from '@/core/domain/models/Track'
 import {
   SPOTIFY_ACCESS_TOKEN_COOKIE,
   SPOTIFY_REFRESH_TOKEN_COOKIE,
@@ -19,16 +20,6 @@ function unauthorizedResponse() {
     authUrl: '/api/spotify/login',
     track: null,
   })
-}
-
-function mapSpotifyTrack(item: any): Track {
-  return {
-    id: item.id,
-    title: item.name,
-    artist: (item.artists ?? []).map((artist: any) => artist.name).join(', '),
-    album: item.album?.name ?? 'Album desconhecido',
-    duration: Math.floor((item.duration_ms ?? 0) / 1000),
-  }
 }
 
 async function getValidAccessToken(
@@ -78,12 +69,15 @@ export async function GET(request: NextRequest) {
       return unauthorizedResponse()
     }
 
-    const spotifyResponse = await axios.get(spotifyCurrentTrackEndpoint, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      validateStatus: (status) => [200, 204, 401].includes(status),
-    })
+    const spotifyResponse = await axios.get<SpotifyCurrentlyPlayingResponse>(
+      spotifyCurrentTrackEndpoint,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        validateStatus: (status) => [200, 204, 401].includes(status),
+      }
+    )
 
     if (spotifyResponse.status === 204) {
       return response
@@ -94,17 +88,19 @@ export async function GET(request: NextRequest) {
       return unauthorizedResponse()
     }
 
-    const item = spotifyResponse.data?.item
+    const mappedTrack = SpotifyToTrackMapper.mapCurrentlyPlaying(
+      spotifyResponse.data
+    )
 
-    if (!item || spotifyResponse.data?.currently_playing_type !== 'track') {
+    if (!mappedTrack) {
       return response
     }
 
     return NextResponse.json({
       requiresAuth: false,
       authUrl: null,
-      isPlaying: Boolean(spotifyResponse.data?.is_playing),
-      track: mapSpotifyTrack(item),
+      isPlaying: Boolean(spotifyResponse.data.is_playing),
+      track: mappedTrack,
     })
   } catch {
     return NextResponse.json(

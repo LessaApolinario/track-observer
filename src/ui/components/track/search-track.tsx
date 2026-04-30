@@ -18,6 +18,7 @@ export function SearchTrack() {
       artist: 'Resultado da busca',
       album: 'Prévia local',
       duration: 180,
+      imageUrl: '',
     }
   }
 

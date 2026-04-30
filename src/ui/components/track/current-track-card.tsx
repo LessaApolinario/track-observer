@@ -1,3 +1,5 @@
+'use client'
+
 import {
   useConnectSpotify,
   useCurrentTrack,
@@ -41,11 +43,27 @@ export function CurrentTrackCard() {
           </span>
         </div>
 
-        <div className="space-y-1">
-          <h2 className="text-foreground text-3xl font-bold">
-            {currentTrack.title}
-          </h2>
-          <p className="text-muted text-base">{currentTrack.artist}</p>
+        <div className="grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)] sm:items-center">
+          <div className="border-border bg-surface-strong/40 aspect-square overflow-hidden rounded-xl border">
+            {currentTrack.imageUrl ? (
+              <img
+                src={currentTrack.imageUrl}
+                alt={currentTrack.album}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="text-muted flex h-full w-full items-center justify-center text-xs font-semibold uppercase">
+                Sem capa
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-foreground text-3xl font-bold">
+              {currentTrack.title}
+            </h2>
+            <p className="text-muted text-base">{currentTrack.artist}</p>
+          </div>
         </div>
 
         <div className="text-muted flex items-center gap-3 text-sm">
