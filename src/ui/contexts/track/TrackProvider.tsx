@@ -20,11 +20,22 @@ export function TrackProvider({ children }: PropsWithChildren) {
     setTracks((prevTracks) => [...prevTracks, newTrack])
   }, [])
 
-  const searchTrack = useCallback((query: string) => {
-    // Implement search logic here, e.g., filter tracks based on the query
-    // For now, this is just a placeholder
-    console.log(`Searching for track with query: ${query}`)
-  }, [])
+  const searchTrack = useCallback(
+    (query: string) => {
+      const normalizedQuery = query.trim().toLowerCase()
+
+      if (!normalizedQuery) {
+        return tracks
+      }
+
+      return tracks.filter((track) => {
+        const haystack =
+          `${track.title} ${track.artist} ${track.album}`.toLowerCase()
+        return haystack.includes(normalizedQuery)
+      })
+    },
+    [tracks]
+  )
 
   const updateCurrentTrack = useCallback((newTrack: Track | undefined) => {
     setCurrentTrack(newTrack)

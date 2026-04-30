@@ -1,36 +1,22 @@
 'use client'
 
 import { Track } from '@/core/domain/models/Track'
-import { useAddTrack, useSearchTrack } from '@/ui/contexts/track/hooks'
+import { useSearchTrack } from '@/ui/contexts/track/hooks'
 import { SyntheticEvent, useState } from 'react'
 
 export function SearchTrack() {
-  const addTrack = useAddTrack()
   const searchTrack = useSearchTrack()
   const [query, setQuery] = useState('')
-  const [foundTrack, setFoundTrack] = useState<Track>()
+  const [foundTracks, setFoundTracks] = useState<Track[]>([])
   const [feedback, setFeedback] = useState('')
 
-  function createMockTrackFromQuery(normalizedQuery: string): Track {
-    return {
-      id: `mock-${Date.now()}`,
-      title: normalizedQuery,
-      artist: 'Resultado da busca',
-      album: 'Prévia local',
-      duration: 180,
-      imageUrl: '',
-    }
-  }
+  function handleQueryChange(value: string) {
+    setQuery(value)
 
-  function handleAddFoundTrack() {
-    if (!foundTrack) {
-      return
+    if (!value.trim()) {
+      setFoundTracks([])
+      setFeedback('')
     }
-
-    addTrack(foundTrack)
-    setFeedback('Faixa adicionada na fila.')
-    setFoundTrack(undefined)
-    setQuery('')
   }
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
@@ -38,12 +24,18 @@ export function SearchTrack() {
     const normalizedQuery = query.trim()
 
     if (!normalizedQuery) {
+      setFoundTracks([])
+      setFeedback('')
       return
     }
 
-    searchTrack(normalizedQuery)
-    setFoundTrack(createMockTrackFromQuery(normalizedQuery))
-    setFeedback('')
+    const result = searchTrack(normalizedQuery)
+    setFoundTracks(result)
+    setFeedback(
+      result.length
+        ? `${result.length} faixa(s) encontrada(s) na fila.`
+        : 'Nenhuma faixa encontrada na fila.'
+    )
   }
 
   return (
@@ -54,13 +46,13 @@ export function SearchTrack() {
       >
         <label className="space-y-2" htmlFor="track-query">
           <span className="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Buscar
+            Buscar na fila
           </span>
           <input
             id="track-query"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Faixa ou artista"
+            onChange={(event) => handleQueryChange(event.target.value)}
+            placeholder="Faixa, artista ou album"
             className="border-border bg-background text-foreground placeholder:text-muted/80 focus:border-primary w-full rounded-2xl border px-4 py-3 text-sm focus:outline-none"
           />
         </label>
@@ -73,25 +65,20 @@ export function SearchTrack() {
         </button>
       </form>
 
-      {foundTrack && (
-        <article className="border-border bg-surface-strong/35 rounded-xl border px-4 py-3">
-          <p className="text-primary text-xs font-bold tracking-widest uppercase">
-            Resultado encontrado
-          </p>
-          <p className="text-foreground mt-2 font-semibold">
-            {foundTrack.title}
-          </p>
-          <p className="text-muted text-sm">
-            {foundTrack.artist} • {foundTrack.album}
-          </p>
-          <button
-            type="button"
-            onClick={handleAddFoundTrack}
-            className="bg-primary hover:bg-primary-strong mt-3 inline-flex rounded-lg px-4 py-2 text-sm font-semibold text-white"
-          >
-            Adicionar à fila
-          </button>
-        </article>
+      {!!foundTracks.length && (
+        <section className="space-y-2" aria-label="Resultados da busca">
+          {foundTracks.map((track) => (
+            <article
+              key={track.id}
+              className="border-border bg-surface-strong/35 rounded-xl border px-4 py-3"
+            >
+              <p className="text-foreground font-semibold">{track.title}</p>
+              <p className="text-muted text-sm">
+                {track.artist} • {track.album}
+              </p>
+            </article>
+          ))}
+        </section>
       )}
 
       {feedback && <p className="text-primary-strong text-sm">{feedback}</p>}

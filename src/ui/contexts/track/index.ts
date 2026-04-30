@@ -6,7 +6,7 @@ interface TrackProps {
   spotifyAuthUrl: string | null
   tracks: Track[]
   addTrack: (track: Track) => void
-  searchTrack: (query: string) => void
+  searchTrack: (query: string) => Track[]
   updateCurrentTrack: (track: Track | undefined) => void
   connectSpotify: () => void
 }
