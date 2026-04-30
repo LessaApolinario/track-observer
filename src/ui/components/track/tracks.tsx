@@ -16,7 +16,7 @@ export function Tracks() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <section aria-label="Tracks" className="flex flex-col gap-2">
       {tracks.map((track) => (
         <TrackCard
           key={track.id}
@@ -24,6 +24,6 @@ export function Tracks() {
           isCurrent={track.id === currentTrack?.id}
         />
       ))}
-    </div>
+    </section>
   )
 }
