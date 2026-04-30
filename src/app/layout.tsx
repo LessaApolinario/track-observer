@@ -1,4 +1,5 @@
 import { TrackProvider } from '@/ui/contexts/track/TrackProvider'
+import { ChatProvider } from '@/ui/contexts/chat/ChatProvider'
 import type { Metadata } from 'next'
 import { Manrope } from 'next/font/google'
 import './globals.css'
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${manrope.variable} h-full antialiased`}>
       <body className="text-foreground min-h-full font-sans">
-        <TrackProvider>{children}</TrackProvider>
+        <TrackProvider>
+          <ChatProvider>{children}</ChatProvider>
+        </TrackProvider>
       </body>
     </html>
   )
