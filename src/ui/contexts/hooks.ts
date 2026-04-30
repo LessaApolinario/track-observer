@@ -1,10 +1,14 @@
-"use client"
+'use client'
 
-import { useContextSelector } from "use-context-selector"
-import { TrackContext } from "."
+import { useContextSelector } from 'use-context-selector'
+import { TrackContext } from '.'
 
 export function useCurrentTrack() {
   return useContextSelector(TrackContext, (ctx) => ctx.currentTrack)
+}
+
+export function useSpotifyAuthUrl() {
+  return useContextSelector(TrackContext, (ctx) => ctx.spotifyAuthUrl)
 }
 
 export function useTracks() {
@@ -21,4 +25,8 @@ export function useSearchTrack() {
 
 export function useUpdateCurrentTrack() {
   return useContextSelector(TrackContext, (ctx) => ctx.updateCurrentTrack)
+}
+
+export function useConnectSpotify() {
+  return useContextSelector(TrackContext, (ctx) => ctx.connectSpotify)
 }

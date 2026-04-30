@@ -1,12 +1,27 @@
-import { useCurrentTrack } from '@/ui/contexts/hooks'
+import {
+  useConnectSpotify,
+  useCurrentTrack,
+  useSpotifyAuthUrl,
+} from '@/ui/contexts/hooks'
 
 export function CurrentTrackCard() {
   const currentTrack = useCurrentTrack()
+  const spotifyAuthUrl = useSpotifyAuthUrl()
+  const connectSpotify = useConnectSpotify()
 
   if (!currentTrack) {
     return (
       <div className="rounded-panel border-border bg-surface border px-6 py-8 text-center">
         <p className="text-muted text-sm">Nenhuma faixa tocando no momento.</p>
+        {spotifyAuthUrl && (
+          <button
+            type="button"
+            onClick={connectSpotify}
+            className="bg-primary hover:bg-primary-strong mt-4 inline-flex cursor-pointer rounded-2xl px-5 py-2 text-sm font-bold text-white"
+          >
+            Conectar com Spotify
+          </button>
+        )}
       </div>
     )
   }

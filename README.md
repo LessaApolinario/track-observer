@@ -1,5 +1,48 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Spotify Integration
+
+This project now includes Spotify OAuth and a server-side endpoint that reads the current playing track from your Spotify account using Route Handlers:
+
+- `GET /api/spotify/login`: Starts OAuth flow
+- `GET /api/spotify/callback`: Exchanges `code` for tokens and stores secure cookies
+- `GET /api/spotify/current-track`: Returns the currently playing track mapped to the app model
+
+### 1) Create your app on Spotify
+
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Click **Create an App**.
+3. Fill in app name and description.
+4. Open **Edit Settings**.
+5. Add this Redirect URI:
+	- `http://localhost:3000/api/spotify/callback`
+6. Save settings.
+7. Copy your **Client ID** and **Client Secret**.
+
+### 2) Add environment variables
+
+Create a `.env.local` file in the project root:
+
+```bash
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+SPOTIFY_REDIRECT_URI=http://localhost:3000/api/spotify/callback
+```
+
+### 3) Run and authenticate
+
+1. Start the project (`yarn dev` or `npm run dev`).
+2. Open `http://localhost:3000`.
+3. Click **Conectar com Spotify** when it appears.
+4. Authorize the app.
+
+After callback, the app polls `/api/spotify/current-track` and updates the track card automatically.
+
+### Required Spotify scopes
+
+- `user-read-currently-playing`
+- `user-read-playback-state`
+
 ## Getting Started
 
 First, run the development server:
