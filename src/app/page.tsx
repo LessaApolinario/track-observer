@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatPanel } from '@/components/chat/chat-panel'
+import { ChatPanel } from '@/ui/components/chat/chat-panel'
 import { CurrentTrackCard } from '@/ui/components/track/current-track-card'
 import { SearchTrack } from '@/ui/components/track/search-track'
 import { Tracks } from '@/ui/components/track/tracks'
