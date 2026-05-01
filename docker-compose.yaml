@@ -1,0 +1,14 @@
+services:
+  track-observer-mongodb-database:
+    image: mongo:${MONGO_VERSION:-8.2.6}
+    restart: always
+    container_name: track-observer-mongodb-database
+    ports:
+      - "${MONGO_HOST_SERVER_PORT:-7429}:27017"
+    env_file:
+      - .env
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
