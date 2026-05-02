@@ -7,6 +7,10 @@ export function useCurrentTrack() {
   return useContextSelector(TrackContext, (ctx) => ctx.currentTrack)
 }
 
+export function useRoomCurrentTracks() {
+  return useContextSelector(TrackContext, (ctx) => ctx.roomCurrentTracks)
+}
+
 export function useSpotifyAuthUrl() {
   return useContextSelector(TrackContext, (ctx) => ctx.spotifyAuthUrl)
 }

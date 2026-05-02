@@ -23,9 +23,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${manrope.variable} h-full antialiased`}>
       <body className="text-foreground min-h-full font-sans">
-        <TrackProvider>
-          <ChatProvider>{children}</ChatProvider>
-        </TrackProvider>
+        <ChatProvider>
+          <TrackProvider>{children}</TrackProvider>
+        </ChatProvider>
       </body>
     </html>
   )

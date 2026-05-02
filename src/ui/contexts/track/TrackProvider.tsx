@@ -1,18 +1,35 @@
 'use client'
 
+import { RoomCurrentTrack } from '@/core/domain/models/RoomCurrentTrack'
 import { Track } from '@/core/domain/models/Track'
+import { useChatUser } from '@/ui/contexts/chat/hooks'
 import axios from 'axios'
-import { PropsWithChildren, useCallback, useEffect, useState } from 'react'
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { TrackContext } from '.'
 
 interface CurrentTrackApiResponse {
   requiresAuth: boolean
   authUrl: string | null
   track: Track | null
+  isPlaying: boolean
+}
+
+interface RoomTracksApiResponse {
+  tracks: RoomCurrentTrack[]
 }
 
 export function TrackProvider({ children }: PropsWithChildren) {
+  const currentUser = useChatUser()
   const [currentTrack, setCurrentTrack] = useState<Track>()
+  const [roomCurrentTracks, setRoomCurrentTracks] = useState<
+    RoomCurrentTrack[]
+  >([])
   const [tracks, setTracks] = useState<Track[]>([])
   const [spotifyAuthUrl, setSpotifyAuthUrl] = useState<string | null>(null)
 
@@ -46,6 +63,62 @@ export function TrackProvider({ children }: PropsWithChildren) {
     window.location.href = url
   }, [spotifyAuthUrl])
 
+  const syncRoomTracks = useCallback(async () => {
+    try {
+      const response = await axios.get<RoomTracksApiResponse>(
+        '/api/room/current-tracks'
+      )
+
+      setRoomCurrentTracks(response.data.tracks)
+    } catch {
+      setRoomCurrentTracks([])
+    }
+  }, [])
+
+  const syncPresenceWithRoom = useCallback(
+    async (payload: {
+      action: 'upsert'
+      user: { id: string; name: string }
+      track: Track
+    }) => {
+      const response = await axios.post<RoomTracksApiResponse>(
+        '/api/room/current-tracks',
+        {
+          action: payload.action,
+          payload: {
+            user: payload.user,
+            track: payload.track,
+          },
+        }
+      )
+
+      setRoomCurrentTracks(response.data.tracks)
+    },
+    []
+  )
+
+  const removePresenceFromRoom = useCallback(async (userId: string) => {
+    if (!userId) {
+      return
+    }
+
+    try {
+      const response = await axios.post<RoomTracksApiResponse>(
+        '/api/room/current-tracks',
+        {
+          action: 'remove',
+          payload: {
+            userId,
+          },
+        }
+      )
+
+      setRoomCurrentTracks(response.data.tracks)
+    } catch {
+      // Ignore cleanup errors during teardown flows.
+    }
+  }, [])
+
   const syncCurrentTrack = useCallback(async () => {
     try {
       const response = await axios.get<CurrentTrackApiResponse>(
@@ -55,13 +128,15 @@ export function TrackProvider({ children }: PropsWithChildren) {
       if (response.data.requiresAuth) {
         setSpotifyAuthUrl(response.data.authUrl ?? '/api/spotify/login')
         setCurrentTrack(undefined)
+        await removePresenceFromRoom(currentUser.id)
         return
       }
 
       setSpotifyAuthUrl(null)
 
-      if (!response.data.track) {
+      if (!response.data.track || !response.data.isPlaying) {
         setCurrentTrack(undefined)
+        await removePresenceFromRoom(currentUser.id)
         return
       }
 
@@ -77,36 +152,88 @@ export function TrackProvider({ children }: PropsWithChildren) {
 
         return [...previousTracks, response.data.track as Track]
       })
+
+      await syncPresenceWithRoom({
+        action: 'upsert',
+        user: currentUser,
+        track: response.data.track,
+      })
     } catch {
       setCurrentTrack(undefined)
     }
-  }, [])
+  }, [currentUser, removePresenceFromRoom, syncPresenceWithRoom])
 
   useEffect(() => {
-    void syncCurrentTrack()
+    const kickoff = window.setTimeout(() => {
+      void syncRoomTracks()
+      void syncCurrentTrack()
+    }, 0)
 
     const timer = window.setInterval(() => {
       void syncCurrentTrack()
     }, 15000)
 
     return () => {
+      window.clearTimeout(kickoff)
       window.clearInterval(timer)
     }
-  }, [syncCurrentTrack])
+  }, [syncCurrentTrack, syncRoomTracks])
 
-  return (
-    <TrackContext.Provider
-      value={{
-        currentTrack,
-        spotifyAuthUrl,
-        tracks,
-        addTrack,
-        searchTrack,
-        updateCurrentTrack,
-        connectSpotify,
-      }}
-    >
-      {children}
-    </TrackContext.Provider>
+  useEffect(() => {
+    const userId = currentUser.id
+
+    const sendBeaconRemoval = () => {
+      if (!userId || typeof navigator === 'undefined') {
+        return
+      }
+
+      const payload = JSON.stringify({
+        action: 'remove',
+        payload: {
+          userId,
+        },
+      })
+
+      const blob = new Blob([payload], { type: 'application/json' })
+      navigator.sendBeacon('/api/room/current-tracks', blob)
+    }
+
+    const handlePageExit = () => {
+      sendBeaconRemoval()
+    }
+
+    window.addEventListener('pagehide', handlePageExit)
+    window.addEventListener('beforeunload', handlePageExit)
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageExit)
+      window.removeEventListener('beforeunload', handlePageExit)
+      void removePresenceFromRoom(userId)
+    }
+  }, [currentUser.id, removePresenceFromRoom])
+
+  const value = useMemo(
+    () => ({
+      currentTrack,
+      roomCurrentTracks,
+      spotifyAuthUrl,
+      tracks,
+      addTrack,
+      searchTrack,
+      updateCurrentTrack,
+      connectSpotify,
+    }),
+    [
+      addTrack,
+      connectSpotify,
+      currentTrack,
+      roomCurrentTracks,
+      searchTrack,
+      spotifyAuthUrl,
+      tracks,
+      updateCurrentTrack,
+    ]
   )
+
+  return <TrackContext.Provider value={value}>{children}</TrackContext.Provider>
 }

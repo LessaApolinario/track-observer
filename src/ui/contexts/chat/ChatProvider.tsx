@@ -119,13 +119,16 @@ export function ChatProvider({ children }: PropsWithChildren) {
   )
 
   useEffect(() => {
-    void syncMessages()
+    const kickoff = window.setTimeout(() => {
+      void syncMessages()
+    }, 0)
 
     const timer = window.setInterval(() => {
       void syncMessages()
     }, 2000)
 
     return () => {
+      window.clearTimeout(kickoff)
       window.clearInterval(timer)
     }
   }, [syncMessages])
