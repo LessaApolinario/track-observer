@@ -1,79 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+> 🇧🇷 Leia em Português: [README-pt-br.md](README-pt-br.md)
 
-## Spotify Integration
+# Track Observer
 
-This project now includes Spotify OAuth and a server-side endpoint that reads the current playing track from your Spotify account using Route Handlers:
+A real-time music sharing and chat application. Connect your Spotify account, see what you are currently listening to, share it with a room of other listeners, and chat — all at once.
 
-- `GET /api/spotify/login`: Starts OAuth flow
-- `GET /api/spotify/callback`: Exchanges `code` for tokens and stores secure cookies
-- `GET /api/spotify/current-track`: Returns the currently playing track mapped to the app model
+---
 
-### 1) Create your app on Spotify
+## Features
 
-1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-2. Click **Create an App**.
-3. Fill in app name and description.
-4. Open **Edit Settings**.
-5. Add this Redirect URI:
-	- `http://localhost:3000/api/spotify/callback`
-6. Save settings.
-7. Copy your **Client ID** and **Client Secret**.
+- **Spotify integration** — OAuth 2.0 login, automatic token refresh, current track polling
+- **Room presence** — see what other participants in the room are currently listening to (MongoDB-backed with TTL auto-expiry)
+- **Live chat** — in-memory message feed with anonymous users and custom nicknames
+- **Track search** — filter visible room tracks locally without extra requests
+- **Responsive UI** — Tailwind CSS grid layout from mobile to desktop
+- **React 19 Compiler** — automatic memoization for optimal rendering performance
 
-### 2) Add environment variables
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| UI | React 19, Tailwind CSS v4 |
+| State | `use-context-selector` |
+| HTTP Client | Axios |
+| Database | MongoDB 7 (native driver) |
+| WebSocket | ws |
+| Testing | Jest 30, React Testing Library |
+| Containerization | Docker Compose (MongoDB) |
+
+---
+
+## Architecture Overview
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Main page
+│   ├── layout.tsx            # Root layout (providers)
+│   └── api/
+│       ├── spotify/          # OAuth login, callback, current-track
+│       ├── chat/             # In-memory message store (GET / POST)
+│       └── room/
+│           └── current-tracks/  # MongoDB presence (GET / POST)
+├── core/
+│   ├── domain/models/        # ChatMessage, Track, User, RoomCurrentTrack
+│   ├── infrastructure/mongodb/  # Connection client with global caching
+│   ├── @types/spotify/       # Spotify API type definitions
+│   └── mappers/              # SpotifyToTrackMapper
+└── ui/
+    ├── components/           # Chat panel, track cards, search
+    └── contexts/             # ChatProvider, TrackProvider + hooks
+```
+
+---
+
+## API Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/spotify/login` | GET | Starts the OAuth 2.0 flow and redirects to Spotify |
+| `/api/spotify/callback` | GET | Exchanges the auth code for tokens, stores them in secure cookies |
+| `/api/spotify/current-track` | GET | Returns the currently playing track, refreshes token if needed |
+| `/api/chat` | GET | Lists chat messages |
+| `/api/chat` | POST | Sends a new chat message |
+| `/api/room/current-tracks` | GET | Lists all room participants and their current tracks |
+| `/api/room/current-tracks` | POST | Upserts or removes a user's track from the room |
+
+---
+
+## Setup
+
+### Prerequisites
+
+- Node.js 20+
+- A Spotify Developer account
+- Docker (for the local MongoDB instance)
+
+---
+
+### 1. Create a Spotify App
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Click **Create an App** and fill in the name and description.
+3. Open **Edit Settings** and add the following Redirect URI:
+   ```
+   http://localhost:3000/api/spotify/callback
+   ```
+4. Save and copy your **Client ID** and **Client Secret**.
+
+---
+
+### 2. Start MongoDB
+
+```bash
+docker compose up -d
+```
+
+This starts a MongoDB instance on port `8200` (configurable via `MONGO_HOST_SERVER_PORT`).
+
+---
+
+### 3. Configure environment variables
 
 Create a `.env.local` file in the project root:
 
-```bash
+```env
+# Spotify
 SPOTIFY_CLIENT_ID=your_client_id
 SPOTIFY_CLIENT_SECRET=your_client_secret
 SPOTIFY_REDIRECT_URI=http://localhost:3000/api/spotify/callback
+SPOTIFY_APP_BASE_URL=http://localhost:3000
+
+# MongoDB
+MONGO_URL=mongodb://root:password@localhost:8200
+MONGO_DATABASE=track-observer
 ```
 
-### 3) Run and authenticate
+---
 
-1. Start the project (`yarn dev` or `npm run dev`).
-2. Open `http://localhost:3000`.
-3. Click **Conectar com Spotify** when it appears.
-4. Authorize the app.
+### 4. Install dependencies and run
 
-After callback, the app polls `/api/spotify/current-track` and updates the track card automatically.
+```bash
+yarn install
+yarn dev
+```
 
-### Required Spotify scopes
+Open [http://localhost:3000](http://localhost:3000), click **Conectar com Spotify**, and authorize the app.
+
+---
+
+## Running Tests
+
+```bash
+yarn test
+```
+
+Tests use Jest with React Testing Library and jsdom.
+
+---
+
+## Required Spotify Scopes
 
 - `user-read-currently-playing`
 - `user-read-playback-state`
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
