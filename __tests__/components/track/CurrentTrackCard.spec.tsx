@@ -37,7 +37,7 @@ describe('CurrentTrackCard', () => {
           artist: 'Test Artist',
           album: 'Test Album',
           duration: 240,
-          imageUrl: 'https://example.com/image.jpg',
+          imageUrl: 'image-url',
         },
         updatedAt: new Date().toISOString(),
       },
@@ -50,8 +50,13 @@ describe('CurrentTrackCard', () => {
     const playingNowText = screen.getByText(/tocando na sala/i)
     expect(playingNowText).toBeInTheDocument()
 
-    const image = screen.getByRole('img')
-    expect(image).toHaveAttribute('src', 'https://example.com/image.jpg')
+    const image = screen.getByRole('img', {
+      name: /test album/i,
+    })
+    expect(image).toHaveAttribute(
+      'src',
+      '/_next/image?url=image-url&w=128&q=75'
+    )
     expect(image).toHaveAttribute('alt', 'Test Album')
 
     const titleHeading = screen.getByRole('heading', {
